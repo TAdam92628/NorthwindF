@@ -6,10 +6,6 @@ namespace NorthwindF.Controllers
     [Route("[controller]")]
     public class NorthwindController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
 
         private readonly ILogger<NorthwindController> _logger;
 
@@ -17,5 +13,7 @@ namespace NorthwindF.Controllers
         {
             _logger = logger;
         }
+
+
     }
 }
