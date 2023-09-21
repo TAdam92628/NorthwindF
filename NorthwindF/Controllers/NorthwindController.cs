@@ -22,8 +22,13 @@ namespace NorthwindF.Controllers
         [HttpGet]
         public IEnumerable<Product> Get()
         {
+            _logger.LogInformation("Started product fetching", DateTime.UtcNow.ToLongTimeString());
             ODataWebExperimental.Northwind.Model.NorthwindEntities nw =
                         new ODataWebExperimental.Northwind.Model.NorthwindEntities(new Uri("http://services.odata.org/V4/Northwind/Northwind.svc/"));
+
+            if (nw != null)
+            _logger.LogInformation("OData was accessed", DateTime.UtcNow.ToLongTimeString());
+
             var products = nw.Products.ToList().Select(x => new Product
             {
                 ProductID = x.ProductID,
@@ -50,8 +55,15 @@ namespace NorthwindF.Controllers
         [Route("getFilteredProducts")]
         public JsonResult getFilteredProducts([FromForm] string name)
         {
+            _logger.LogInformation("Started product filtering", DateTime.UtcNow.ToLongTimeString());
+            _logger.LogInformation("Filtering string: {0}", name, DateTime.UtcNow.ToLongTimeString());
+
             ODataWebExperimental.Northwind.Model.NorthwindEntities nw =
                         new ODataWebExperimental.Northwind.Model.NorthwindEntities(new Uri("http://services.odata.org/V4/Northwind/Northwind.svc/"));
+
+            if (nw != null)
+                _logger.LogInformation("OData was accessed", DateTime.UtcNow.ToLongTimeString());
+
             var products = nw.Products.Where(x => x.ProductName.Contains(name)).ToList().Select(x => new Product
             {
                 ProductID = x.ProductID,
@@ -63,6 +75,9 @@ namespace NorthwindF.Controllers
                 ReorderLevel = x.ReorderLevel,
                 Discontinued = x.Discontinued
             });
+
+
+            _logger.LogInformation("Number of results: {0}", products.Count().ToString(), DateTime.UtcNow.ToLongTimeString());
 
             return new JsonResult(products);
 
@@ -76,9 +91,11 @@ namespace NorthwindF.Controllers
         [Route("getSumSupplier")]
         public JsonResult getSumSupplier()
         {
+            _logger.LogInformation("Started supplier aggregation", DateTime.UtcNow.ToLongTimeString());
             ODataWebExperimental.Northwind.Model.NorthwindEntities nw =
                         new ODataWebExperimental.Northwind.Model.NorthwindEntities(new Uri("http://services.odata.org/V4/Northwind/Northwind.svc/"));
-
+            if (nw != null)
+                _logger.LogInformation("OData was accessed", DateTime.UtcNow.ToLongTimeString());
 
             var Suppliers = nw.Suppliers.ToList();
             var Products = nw.Products.ToList();
