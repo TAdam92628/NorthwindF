@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using NorthwindF.Model;
+using NorthwindModel;
+using System.Text;
+using System.Xml.Linq;
 
 namespace NorthwindF.Controllers
 {
@@ -20,28 +23,43 @@ namespace NorthwindF.Controllers
         /// </summary>
         /// <returns>Termékek listája</returns>
         [HttpGet]
-        public IEnumerable<Product> Get()
+        public IEnumerable<Model.Product> Get()
         {
-            _logger.LogInformation("Started product fetching", DateTime.UtcNow.ToLongTimeString());
-            ODataWebExperimental.Northwind.Model.NorthwindEntities nw =
-                        new ODataWebExperimental.Northwind.Model.NorthwindEntities(new Uri("http://services.odata.org/V4/Northwind/Northwind.svc/"));
-
-            if (nw != null)
-            _logger.LogInformation("OData was accessed", DateTime.UtcNow.ToLongTimeString());
-
-            var products = nw.Products.ToList().Select(x => new Product
+            try
             {
-                ProductID = x.ProductID,
-                ProductName = x.ProductName,
-                QuantityPerUnit = x.QuantityPerUnit,
-                UnitPrice = x.UnitPrice,
-                UnitsInStock = x.UnitsInStock,
-                UnitsOnOrder = x.UnitsOnOrder,
-                ReorderLevel = x.ReorderLevel,
-                Discontinued = x.Discontinued
-            });
+                _logger.LogInformation("Started product fetching", DateTime.UtcNow.ToLongTimeString());
+                ODataWebExperimental.Northwind.Model.NorthwindEntities nw =
+                            new ODataWebExperimental.Northwind.Model.NorthwindEntities(new Uri("http://services.odata.org/V4/Northwind/Northwind.svc/"));
 
-            return products;
+                if (nw != null)
+                {
+                    _logger.LogInformation("OData was accessed", DateTime.UtcNow.ToLongTimeString());
+                }
+                else
+                {
+                    throw new ArgumentNullException();
+                }
+
+                var products = nw.Products.ToList().Select(x => new Model.Product
+                {
+                    ProductID = x.ProductID,
+                    ProductName = x.ProductName,
+                    QuantityPerUnit = x.QuantityPerUnit,
+                    UnitPrice = x.UnitPrice,
+                    UnitsInStock = x.UnitsInStock,
+                    UnitsOnOrder = x.UnitsOnOrder,
+                    ReorderLevel = x.ReorderLevel,
+                    Discontinued = x.Discontinued
+                });
+
+                return products;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, DateTime.UtcNow.ToLongTimeString());
+                return null;
+            }
+
         }
 
         /// <summary>
@@ -55,31 +73,46 @@ namespace NorthwindF.Controllers
         [Route("getFilteredProducts")]
         public JsonResult getFilteredProducts([FromForm] string name)
         {
-            _logger.LogInformation("Started product filtering", DateTime.UtcNow.ToLongTimeString());
-            _logger.LogInformation("Filtering string: {0}", name, DateTime.UtcNow.ToLongTimeString());
-
-            ODataWebExperimental.Northwind.Model.NorthwindEntities nw =
-                        new ODataWebExperimental.Northwind.Model.NorthwindEntities(new Uri("http://services.odata.org/V4/Northwind/Northwind.svc/"));
-
-            if (nw != null)
-                _logger.LogInformation("OData was accessed", DateTime.UtcNow.ToLongTimeString());
-
-            var products = nw.Products.Where(x => x.ProductName.Contains(name)).ToList().Select(x => new Product
+            try
             {
-                ProductID = x.ProductID,
-                ProductName = x.ProductName,
-                QuantityPerUnit = x.QuantityPerUnit,
-                UnitPrice = x.UnitPrice,
-                UnitsInStock = x.UnitsInStock,
-                UnitsOnOrder = x.UnitsOnOrder,
-                ReorderLevel = x.ReorderLevel,
-                Discontinued = x.Discontinued
-            });
+                _logger.LogInformation("Started product filtering", DateTime.UtcNow.ToLongTimeString());
+                _logger.LogInformation("Filtering string: {0}", name);
+
+                ODataWebExperimental.Northwind.Model.NorthwindEntities nw =
+                            new ODataWebExperimental.Northwind.Model.NorthwindEntities(new Uri("http://services.odata.org/V4/Northwind/Northwind.svc/"));
+
+                if (nw != null)
+                {
+                    _logger.LogInformation("OData was accessed", DateTime.UtcNow.ToLongTimeString());
+                }
+                else
+                {
+                    throw new ArgumentNullException();
+                }
+
+                var products = nw.Products.Where(x => x.ProductName.Contains(name)).ToList().Select(x => new Model.Product
+                {
+                    ProductID = x.ProductID,
+                    ProductName = x.ProductName,
+                    QuantityPerUnit = x.QuantityPerUnit,
+                    UnitPrice = x.UnitPrice,
+                    UnitsInStock = x.UnitsInStock,
+                    UnitsOnOrder = x.UnitsOnOrder,
+                    ReorderLevel = x.ReorderLevel,
+                    Discontinued = x.Discontinued
+                });
 
 
-            _logger.LogInformation("Number of results: {0}", products.Count().ToString(), DateTime.UtcNow.ToLongTimeString());
+                _logger.LogInformation("Number of results: {0}", products.Count().ToString());
 
-            return new JsonResult(products);
+                return new JsonResult(products);
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, DateTime.UtcNow.ToLongTimeString());
+                return null;
+            }
 
         }
 
@@ -91,46 +124,64 @@ namespace NorthwindF.Controllers
         [Route("getSumSupplier")]
         public JsonResult getSumSupplier()
         {
-            _logger.LogInformation("Started supplier aggregation", DateTime.UtcNow.ToLongTimeString());
-            ODataWebExperimental.Northwind.Model.NorthwindEntities nw =
-                        new ODataWebExperimental.Northwind.Model.NorthwindEntities(new Uri("http://services.odata.org/V4/Northwind/Northwind.svc/"));
-            if (nw != null)
-                _logger.LogInformation("OData was accessed", DateTime.UtcNow.ToLongTimeString());
+            try
+            {
+                _logger.LogInformation("Started supplier aggregation", DateTime.UtcNow.ToLongTimeString());
+                ODataWebExperimental.Northwind.Model.NorthwindEntities nw =
+                            new ODataWebExperimental.Northwind.Model.NorthwindEntities(new Uri("http://services.odata.org/V4/Northwind/Northwind.svc/"));
 
-            var Suppliers = nw.Suppliers.ToList();
-            var Products = nw.Products.ToList();
-            var Order_Details = nw.Order_Details.ToList();
-
-            var res = Suppliers.Join(Products, x => x.SupplierID, y => y.SupplierID,
-                (x, y) => new
+                if (nw != null)
                 {
-                    x.SupplierID,
-                    y.ProductID,
-                    y.ProductName,
-                    x.CompanyName,
-                    y.UnitPrice
-                }).Join(Order_Details, x => x.ProductID, y => y.ProductID,
-                (x, y) => new
+                    _logger.LogInformation("OData was accessed", DateTime.UtcNow.ToLongTimeString());
+                }
+                else
                 {
-                    x.SupplierID,
-                    x.ProductID,
-                    y.OrderID,
-                    x.ProductName,
-                    x.CompanyName,
-                    x.UnitPrice,
-                    y.Quantity,
-                    y.Discount
-                }).GroupBy(x => new { x.SupplierID, x.ProductID, x.CompanyName, x.ProductName }).Select(x => new AggregateSuppliers
-                {
-                    SupplierID = x.Key.SupplierID,
-                    ProductID = x.Key.ProductID,
-                    CompanyName = x.Key.CompanyName,
-                    ProductName = x.Key.ProductName,
-                    SumPrice = (int)x.Sum(y => (int)y.Quantity * y.UnitPrice * (1 - (decimal)y.Discount))
-                }).ToList();
+                    throw new ArgumentNullException();
+                }
 
-            return new JsonResult(res);
 
+
+                var Suppliers = nw.Suppliers.ToList();
+                var Products = nw.Products.ToList();
+                var Order_Details = nw.Order_Details.ToList();
+
+                var res = Suppliers.Join(Products, x => x.SupplierID, y => y.SupplierID,
+                    (x, y) => new
+                    {
+                        x.SupplierID,
+                        y.ProductID,
+                        y.ProductName,
+                        x.CompanyName,
+                        y.UnitPrice
+                    }).Join(Order_Details, x => x.ProductID, y => y.ProductID,
+                    (x, y) => new
+                    {
+                        x.SupplierID,
+                        x.ProductID,
+                        y.OrderID,
+                        x.ProductName,
+                        x.CompanyName,
+                        x.UnitPrice,
+                        y.Quantity,
+                        y.Discount
+                    }).GroupBy(x => new { x.SupplierID, x.ProductID, x.CompanyName, x.ProductName }).Select(x => new AggregateSuppliers
+                    {
+                        SupplierID = x.Key.SupplierID,
+                        ProductID = x.Key.ProductID,
+                        CompanyName = x.Key.CompanyName,
+                        ProductName = x.Key.ProductName,
+                        SumPrice = (int)x.Sum(y => (int)y.Quantity * y.UnitPrice * (1 - (decimal)y.Discount))
+                    }).ToList();
+
+                return new JsonResult(res);
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, DateTime.UtcNow.ToLongTimeString());
+                return null;
+            }
+           
         }
     }
 }
