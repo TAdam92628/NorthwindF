@@ -75,7 +75,7 @@ export class FetchProducts extends Component {
      async fetchFilteredProducts(e) {
          console.log(e.target.value);
 
-         if (e.target.value != "") {
+         if (e.target.value !== "") {
              const data = new FormData();
              data.append("name", e.target.value);
 
